@@ -77,8 +77,6 @@
             firstDay: moment.localeData().firstDayOfWeek()
         };
 
-        console.log(this.locale);
-
         this.callback = function() { };
 
         //some state information
@@ -276,7 +274,6 @@
             while (iterator > 0) {
                 this.locale.daysOfWeek.push(this.locale.daysOfWeek.shift());
                 iterator--;
-                console.log(this.locale.daysOfWeek);
             }
         }
 
