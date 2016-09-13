@@ -327,7 +327,7 @@
 
                 // If the end of the range is before the minimum or the start of the range is
                 // after the maximum, don't display this range option at all.
-                if ((this.minDate && end.isBefore(this.minDate, this.timepicker ? 'minute' : 'day')) 
+                if ((this.minDate && end.isBefore(this.minDate, this.timepicker ? 'minute' : 'day'))
                   || (maxDate && start.isAfter(maxDate, this.timepicker ? 'minute' : 'day')))
                     continue;
 
@@ -448,7 +448,7 @@
         // if attached to a text input, set the initial value
         //
 
-        if (this.element.is('input') && !this.singleDatePicker && this.autoUpdateInput) {
+        if (this.element.is('input') && !this.singleDatePicker && this.autoUpdateInput && this.startDate.diff(this.endDate, 'days') !== 0) {
             this.element.val(this.startDate.format(this.locale.format) + this.locale.separator + this.endDate.format(this.locale.format));
             this.element.trigger('change');
         } else if (this.element.is('input') && this.autoUpdateInput) {
@@ -652,7 +652,7 @@
                 curDate = moment([year, 0, 1]);
                 if (side == 'right') {
                     if (this.leftCalendar.month.year() === this.rightCalendar.month.year()) {
-                        curDate = curDate.add('year', 1);
+                        curDate = curDate.add(1, 'year');
                     }
                 }
                 //initialize a 3 rows x 4 columns array for the calendar
@@ -1581,7 +1581,7 @@
             this.container.find('input[name="daterangepicker_start"], input[name="daterangepicker_end"]').removeClass('active');
             $(e.target).addClass('active');
 
-            // Set the state such that if the user goes back to using a mouse, 
+            // Set the state such that if the user goes back to using a mouse,
             // the calendars are aware we're selecting the end of the range, not
             // the start. This allows someone to edit the end of a date range without
             // re-selecting the beginning, by clicking on the end date input then
@@ -1647,7 +1647,7 @@
         },
 
         updateElement: function() {
-            if (this.element.is('input') && !this.singleDatePicker && this.autoUpdateInput) {
+            if (this.element.is('input') && !this.singleDatePicker && this.autoUpdateInput && this.startDate.diff(this.endDate, 'days') !== 0) {
                 this.element.val(this.startDate.format(this.locale.format) + this.locale.separator + this.endDate.format(this.locale.format));
                 this.element.trigger('change');
             } else if (this.element.is('input') && this.autoUpdateInput) {
