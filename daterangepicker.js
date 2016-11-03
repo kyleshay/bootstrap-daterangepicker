@@ -34,6 +34,7 @@
         this.viewMode = options.viewMode || 'day';
         this.startDate = moment().startOf(this.viewMode);
         this.endDate = moment().endOf(this.viewMode);
+        this.allowBlankDates = false;
         this.minDate = false;
         this.maxDate = false;
         this.dateLimit = false;
@@ -167,6 +168,9 @@
         }
         this.container.addClass(this.locale.direction);
 
+        if (typeof options.allowBlankDates === 'boolean')
+          this.allowBlankDates = options.allowBlankDates;
+
         if (typeof options.startDate === 'string')
             this.startDate = moment(options.startDate, this.locale.format);
 
@@ -294,7 +298,7 @@
                     start = moment(val, this.locale.format);
                     end = moment(val, this.locale.format);
                 }
-                if (start !== null && end !== null) {
+                if (start !== null && end !== null && !options.allowBlankDate) {
                     this.setStartDate(start);
                     this.setEndDate(end);
                 }
@@ -354,7 +358,7 @@
             this.callback = cb;
         }
 
-        if (!this.timePicker) {
+        if (!this.timePicker && !this.allowBlankDate) {
             this.startDate = this.startDate.startOf(this.viewMode);
             this.endDate = this.endDate.endOf(this.viewMode);
             this.container.find('.calendar-time').hide();
@@ -1072,7 +1076,6 @@
         },
 
         updateFormInputs: function() {
-
             //ignore mouse movements while an above-calendar text input has focus
             if (this.container.find('input[name=daterangepicker_start]').is(":focus") || this.container.find('input[name=daterangepicker_end]').is(":focus"))
                 return;
@@ -1189,6 +1192,10 @@
             //if a new date range was selected, invoke the user callback function
             if (!this.startDate.isSame(this.oldStartDate) || !this.endDate.isSame(this.oldEndDate))
                 this.callback(this.startDate, this.endDate, this.chosenLabel);
+
+            if(this.element.val() === "" && this.allowBlankDates) {
+              this.startDate = null;
+            }
 
             //if picker is attached to a text input, update it
             this.updateElement();
@@ -1650,7 +1657,7 @@
             if (this.element.is('input') && !this.singleDatePicker && this.autoUpdateInput && this.startDate.diff(this.endDate, 'days') !== 0) {
                 this.element.val(this.startDate.format(this.locale.format) + this.locale.separator + this.endDate.format(this.locale.format));
                 this.element.trigger('change');
-            } else if (this.element.is('input') && this.autoUpdateInput) {
+            } else if (this.element.is('input') && this.autoUpdateInput && this.startDate) {
                 this.element.val(this.startDate.format(this.locale.format));
                 this.element.trigger('change');
             }
