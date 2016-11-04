@@ -32,9 +32,12 @@
         this.parentEl = 'body';
         this.element = $(element);
         this.viewMode = options.viewMode || 'day';
-        this.startDate = moment().startOf(this.viewMode);
-        this.endDate = moment().endOf(this.viewMode);
-        this.allowBlankDates = false;
+
+        if (!options.allowBlankDates) {
+            this.startDate = moment().startOf(this.viewMode);
+            this.endDate = moment().endOf(this.viewMode);
+        }
+
         this.minDate = false;
         this.maxDate = false;
         this.dateLimit = false;
@@ -171,10 +174,10 @@
         if (typeof options.allowBlankDates === 'boolean')
           this.allowBlankDates = options.allowBlankDates;
 
-        if (typeof options.startDate === 'string')
+        if (!this.allowBlankDates && typeof options.startDate === 'string')
             this.startDate = moment(options.startDate, this.locale.format);
 
-        if (typeof options.endDate === 'string')
+        if (!this.allowBlankDates && typeof options.endDate === 'string')
             this.endDate = moment(options.endDate, this.locale.format);
 
         if (typeof options.minDate === 'string')
@@ -183,10 +186,10 @@
         if (typeof options.maxDate === 'string')
             this.maxDate = moment(options.maxDate, this.locale.format);
 
-        if (typeof options.startDate === 'object')
+        if (!this.allowBlankDates && typeof options.startDate === 'object')
             this.startDate = moment(options.startDate);
 
-        if (typeof options.endDate === 'object')
+        if (!this.allowBlankDates && typeof options.endDate === 'object')
             this.endDate = moment(options.endDate);
 
         if (typeof options.minDate === 'object')
@@ -196,11 +199,11 @@
             this.maxDate = moment(options.maxDate);
 
         // sanity check for bad options
-        if (this.minDate && this.startDate.isBefore(this.minDate))
+        if (!this.allowBlankDates && this.minDate && this.startDate.isBefore(this.minDate))
             this.startDate = this.minDate.clone();
 
         // sanity check for bad options
-        if (this.maxDate && this.endDate.isAfter(this.maxDate))
+        if (!this.allowBlankDates && this.maxDate && this.endDate.isAfter(this.maxDate))
             this.endDate = this.maxDate.clone();
 
         if (typeof options.applyClass === 'string')
@@ -238,7 +241,7 @@
 
         if (typeof options.singleDatePicker === 'boolean') {
             this.singleDatePicker = options.singleDatePicker;
-            if (this.singleDatePicker)
+            if (this.singleDatePicker && !options.allowBlankDates)
                 this.endDate = this.startDate.clone();
         }
 
@@ -284,7 +287,7 @@
         var start, end, range;
 
         //if no start/end dates set, check if an input element contains initial values
-        if (typeof options.startDate === 'undefined' && typeof options.endDate === 'undefined') {
+        if (!this.allowBlankDates && typeof options.startDate === 'undefined' && typeof options.endDate === 'undefined') {
             if ($(this.element).is('input[type=text]')) {
                 var val = $(this.element).val(),
                     split = val.split(this.locale.separator);
@@ -298,7 +301,7 @@
                     start = moment(val, this.locale.format);
                     end = moment(val, this.locale.format);
                 }
-                if (start !== null && end !== null && !options.allowBlankDate) {
+                if (start !== null && end !== null) {
                     this.setStartDate(start);
                     this.setEndDate(end);
                 }
@@ -358,7 +361,7 @@
             this.callback = cb;
         }
 
-        if (!this.timePicker && !this.allowBlankDate) {
+        if (!this.timePicker && !this.allowBlankDates) {
             this.startDate = this.startDate.startOf(this.viewMode);
             this.endDate = this.endDate.endOf(this.viewMode);
             this.container.find('.calendar-time').hide();
@@ -455,11 +458,13 @@
         if (this.element.is('input') && !this.singleDatePicker && this.autoUpdateInput && this.startDate.diff(this.endDate, 'days') !== 0) {
             this.element.val(this.startDate.format(this.locale.format) + this.locale.separator + this.endDate.format(this.locale.format));
             this.element.trigger('change');
-        } else if (this.element.is('input') && this.autoUpdateInput) {
+        } else if (this.element.is('input') && this.autoUpdateInput && !options.allowBlankDates) {
             this.element.val(this.startDate.format(this.locale.format));
             this.element.trigger('change');
+        } else {
+            this.element.val('');
+            this.element.trigger('change');
         }
-
     };
 
     DateRangePicker.prototype = {
@@ -559,6 +564,12 @@
 
         updateMonthsInView: function() {
             var start = (this.startDate || moment());
+            if (!this.startDate) {
+                this.rightCalendar = this.leftCalendar = {
+                    month: moment()
+                };
+                return;
+            }
             if (this.endDate) {
                 var end = (this.endDate || moment());
 
@@ -1082,7 +1093,7 @@
             if (this.container.find('input[name=daterangepicker_start]').is(":focus") || this.container.find('input[name=daterangepicker_end]').is(":focus"))
                 return;
 
-            if(this.startDate)
+            if(this.startDate) 
                 this.container.find('input[name=daterangepicker_start]').val(this.startDate.format(this.locale.format));
 
             if (this.endDate)
@@ -1189,15 +1200,16 @@
         hide: function(e) {
             if (!this.isShowing) return;
 
-            //incomplete date selection, revert to last values
-            if (!this.endDate) {
-                this.startDate = this.oldStartDate.clone();
-                this.endDate = this.oldEndDate.clone();
-            }
 
             if(!e && this.element.val() === "" && this.allowBlankDates) {
-              this.startDate = null;
-              this.endDate = null;
+                this.startDate = null;
+                this.endDate = null;
+            } else {
+                //incomplete date selection, revert to last values
+                if (!this.endDate) {
+                    this.startDate = this.oldStartDate.clone();
+                    this.endDate = this.oldEndDate.clone();
+                }
             }
 
             //if a new date range was selected, invoke the user callback function
