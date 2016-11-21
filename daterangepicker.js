@@ -52,6 +52,7 @@
         this.timePickerIncrement = 1;
         this.timePickerSeconds = false;
         this.linkedCalendars = true;
+        this.offsetCalendars = true;
         this.autoUpdateInput = true;
         this.alwaysShowCalendars = false;
         this.ranges = {};
@@ -266,6 +267,9 @@
         if (typeof options.linkedCalendars === 'boolean')
             this.linkedCalendars = options.linkedCalendars;
 
+        if (typeof options.offsetCalendars === 'boolean')
+            this.offsetCalendars = options.offsetCalendars;
+        
         if (typeof options.isInvalidDate === 'function')
             this.isInvalidDate = options.isInvalidDate;
 
@@ -595,7 +599,7 @@
                     this.rightCalendar.month = start.clone().date(2).add(1, 'month');
                 }
             }
-            if (this.maxDate && !this.singleDatePicker && this.rightCalendar.month > this.maxDate) {
+            if (this.offsetCalendars || (this.maxDate && this.linkedCalendars && !this.singleDatePicker && this.rightCalendar.month > this.maxDate)) {
               this.rightCalendar.month = this.maxDate.clone().date(2);
               this.leftCalendar.month = this.maxDate.clone().date(2).subtract(1, 'month');
             }
