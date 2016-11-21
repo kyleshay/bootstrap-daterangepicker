@@ -593,13 +593,20 @@
                     this.rightCalendar.month = start.clone().date(2).add(1, 'month');
                 }
 
+                if (this.offsetCalendars) {
+                    this.rightCalendar.month = end.clone().date(2);
+                    this.leftCalendar.month = end.clone().date(2).subtract(1, 'month');
+                    if (end.month() != start.month() || end.year() != start.year()) {
+                        this.leftCalendar.month = start.clone().date(2);
+                    }
+                }
             } else {
                 if (this.leftCalendar.month.format('YYYY-MM') != start.format('YYYY-MM') && this.rightCalendar.month.format('YYYY-MM') != start.format('YYYY-MM')) {
                     this.leftCalendar.month = start.clone().date(2);
                     this.rightCalendar.month = start.clone().date(2).add(1, 'month');
                 }
             }
-            if (this.offsetCalendars || (this.maxDate && this.linkedCalendars && !this.singleDatePicker && this.rightCalendar.month > this.maxDate)) {
+            if (this.maxDate && this.linkedCalendars && !this.singleDatePicker && this.rightCalendar.month > this.maxDate) {
               this.rightCalendar.month = this.maxDate.clone().date(2);
               this.leftCalendar.month = this.maxDate.clone().date(2).subtract(1, 'month');
             }
