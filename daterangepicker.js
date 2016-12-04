@@ -1682,7 +1682,7 @@
 
         keydown: function(e) {
             //hide on tab or enter
-            if ((e.keyCode === 9) || (e.keyCode === 13)) {
+            if ((e.keyCode === 9) || (e.keyCode === 13) || (e.keyCode === 27)) {
                 this.hide();
             }
         },
